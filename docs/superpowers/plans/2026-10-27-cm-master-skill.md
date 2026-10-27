@@ -1,6 +1,6 @@
 # CM Master Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Entregar una skill instalable para Codex y Claude Code que administre marcas locales y coordine contenido final, aprobación, publicación por navegador y análisis.
 
@@ -46,11 +46,11 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 
 **Interfaces:** produce la CLI y manifiesto indicados arriba, JSON de salida y exit code no cero ante estado inválido. Sin dependencias externas.
 
-- [ ] Escribir tests de aislamiento, perfil/historial, aprobación ligada a texto/medios/cuenta/fecha, revocación y datos incompletos.
-- [ ] Ejecutar `python3 -m unittest discover -s tests -p 'test_state.py' -v` y observar FAIL antes de implementar.
-- [ ] Implementar persistencia atómica con un lock local, validación de rutas/IDs y zona horaria, revisión, reserva y reconciliación.
-- [ ] Probar CLI en subprocesos con raíces temporales, doble reserva, snapshots públicos y cola `due` sin efectos externos.
-- [ ] Ejecutar los tests y confirmar PASS; documentar el contrato operativo.
+- [x] Escribir tests de aislamiento, perfil/historial, aprobación ligada a texto/medios/cuenta/fecha, revocación y datos incompletos.
+- [x] Ejecutar `python3 -m unittest discover -s tests -p 'test_state.py' -v` y observar FAIL antes de implementar.
+- [x] Implementar persistencia atómica con un lock local, validación de rutas/IDs y zona horaria, revisión, reserva y reconciliación.
+- [x] Probar CLI en subprocesos con raíces temporales, doble reserva, snapshots públicos y cola `due` sin efectos externos.
+- [x] Ejecutar los tests y confirmar PASS; documentar el contrato operativo.
 
 ### Task 2: Archivos visuales finales
 
@@ -58,10 +58,10 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 
 **Interfaces:** renderer independiente del estado, según contrato compartido. Spec relativo al directorio de entrada, sin red ni IA paga.
 
-- [ ] Escribir pruebas que abran un PNG y verifiquen tamaños, texto largo/acentos y error de specs inválidos.
-- [ ] Ejecutar pruebas y observar FAIL por renderer ausente.
-- [ ] Implementar composición Pillow y animación local codificada en MP4 con FFmpeg o imageio-ffmpeg. Soportar imágenes de marca sin deformarlas y detección clara de dependencias.
-- [ ] Ejecutar pruebas y renderizar un MP4 real ficticio; comprobar reproducción, duración y dimensiones. Inspeccionar una imagen y un fotograma.
+- [x] Escribir pruebas que abran un PNG y verifiquen tamaños, texto largo/acentos y error de specs inválidos.
+- [x] Ejecutar pruebas y observar FAIL por renderer ausente.
+- [x] Implementar composición Pillow y animación local codificada en MP4 con FFmpeg o imageio-ffmpeg. Soportar imágenes de marca sin deformarlas y detección clara de dependencias.
+- [x] Ejecutar pruebas y renderizar un MP4 real ficticio; comprobar reproducción, duración y dimensiones. Inspeccionar una imagen y un fotograma.
 
 ### Task 3: Skill y referencias operativas
 
@@ -69,10 +69,10 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 
 **Interfaces:** consume la CLI y spec del renderer anteriores; usa las herramientas reales enumeradas por cada host. La selección automática sigue habilitada.
 
-- [ ] Ejecutar escenarios baseline sin la skill y registrar decisiones observadas.
-- [ ] Escribir instrucciones de entrevista, manual con fuentes/certeza, calendario, contenido original, aprobación y publicación verificable. Usar referencias condicionales, no cargar todo siempre.
-- [ ] Cubrir tendencias actuales, competencia, métricas con denominador, historial y aprendizajes; configuración de correo/tareas por marca sin crearlos durante instalación.
-- [ ] Validar metadata con `quick_validate.py` y ejecutar escenarios independientes con la skill, sólo en sandbox de datos ficticios.
+- [x] Ejecutar escenarios baseline sin la skill y registrar decisiones observadas.
+- [x] Escribir instrucciones de entrevista, manual con fuentes/certeza, calendario, contenido original, aprobación y publicación verificable. Usar referencias condicionales, no cargar todo siempre.
+- [x] Cubrir tendencias actuales, competencia, métricas con denominador, historial y aprendizajes; configuración de correo/tareas por marca sin crearlos durante instalación.
+- [x] Validar metadata con `quick_validate.py` y ejecutar escenarios independientes con la skill, sólo en sandbox de datos ficticios.
 
 ### Task 4: Instalación, ejemplo y entrega
 
@@ -80,10 +80,10 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 
 **Interfaces:** instalador copia la misma carpeta en `~/.agents/skills/cm-master` (Codex) o `~/.claude/skills/cm-master` (Claude). `--destination PATH` para prueba; rechaza destino existente, sin sobrescribir. No cambia settings, permisos, tareas o cuentas.
 
-- [ ] Escribir y observar fallar pruebas de instalación completa y rechazo de sobrescritura.
-- [ ] Implementar instalador, README en español con instalación, invocación y ejemplo reproducible de ciclo editorial; CI sin cuentas externas.
-- [ ] Ejecutar suite completa, validación de skill, render real y revisión independiente contra el diseño.
-- [ ] Corregir hallazgos materiales con pruebas, verificar estado limpio y publicar commits en el repositorio autorizado. Registrar límites de validación reales, sin afirmar haber probado cuentas o Claude en vivo.
+- [x] Escribir y observar fallar pruebas de instalación completa y rechazo de sobrescritura.
+- [x] Implementar instalador, README en español con instalación, invocación y ejemplo reproducible de ciclo editorial; CI sin cuentas externas.
+- [x] Ejecutar suite completa, validación de skill, render real y revisión independiente contra el diseño.
+- [x] Corregir hallazgos materiales con pruebas, verificar estado limpio y publicar commits en el repositorio autorizado. Registrar límites de validación reales, sin afirmar haber probado cuentas o Claude en vivo.
 
 ## Decisiones de ejecución
 
@@ -99,3 +99,7 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 - Para una salida remota comprobada cuyo medio local cambió, `record --reconciled` cierra sólo un resultado incierto con evidencia explícita y conserva la advertencia/versiones. No vuelve a aprobar el paquete local modificado.
 - Los requirements viajan dentro de la skill instalada; los archivos de raíz los incluyen sin duplicar versiones.
 - Archivos ajenos como `.DS_Store` no interrumpen el listado de marcas/paquetes.
+
+## Cierre
+
+Tareas 1–4 implementadas, revisión independiente y prueba funcional completadas. Suite final local: 38 tests PASS, sin skips. Código integrado por fast-forward en main del repositorio nuevo y subido a GitHub. No se modificaron archivos de marcas reales, configuraciones globales ni cuentas externas.

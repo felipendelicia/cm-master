@@ -48,4 +48,6 @@ Los medios del renderer usan una composición base configurable, sin audio; ante
 
 No se publicaron piezas reales, no se enviaron correos, no se crearon tareas reales y no se usaron cuentas de clientes. El flujo de navegador, correo y tareas requiere configurar las herramientas y sesiones del host, elegir una marca real y autorizar sus operaciones. El paquete no incluye un servicio de publicación ni acceso automático a esas cuentas.
 
-No se ejecutó una sesión real de Claude Code. Su compatibilidad se basa en formato Agent Skills portable, instrucciones por capacidad, instalador y scripts probados localmente. Tampoco se verificó todavía CI remoto en las versiones de Python configuradas; el resultado local no sustituye esas ejecuciones.
+No se ejecutó una sesión real de Claude Code. Su compatibilidad se basa en formato Agent Skills portable, instrucciones por capacidad, instalador y scripts probados localmente.
+
+GitHub Actions también completó **38 tests PASS, sin skips, tanto en Python 3.10 como en Python 3.12**, para el commit de implementación `b39e6890a9703164a7b770b6b4b3261bb712f756`. [Ejecución remota verificada](https://github.com/felipendelicia/cm-master/actions/runs/40571089428). Los cambios posteriores a ese commit son únicamente este registro de validación y el cierre documental del plan.

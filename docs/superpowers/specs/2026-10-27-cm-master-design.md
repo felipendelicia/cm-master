@@ -1,6 +1,6 @@
 # CM Master: diseño de la primera versión
 
-Fecha: 27 de octubre de 2026. Estado: propuesta para revisión; la skill todavía no está implementada.
+Fecha: 27 de octubre de 2026. Estado: alcance aprobado por el usuario para implementar, incluida la alternativa inicial de MP4 animados.
 
 ## Propósito
 
@@ -22,7 +22,7 @@ La inspiración en Google Pomelli es su perfil de marca persistente y corregible
 - El usuario delegó la propuesta de calendario y preguntó por recordatorios por mail y ejecución autónoma.
 - El usuario aclaró que ya publica en X y LinkedIn mediante GPT dots. La publicación mediante control de navegador forma parte del alcance solicitado también para esas redes; esta experiencia fue informada por el usuario, no comprobada en cuentas reales durante el diseño.
 
-## Propuestas que requieren revisar el alcance
+## Alcance técnico acordado
 
 ### Publicación mediante el navegador del host
 
@@ -158,6 +158,6 @@ Estas extensiones se pueden incorporar después de probar el flujo principal; no
 - [LinkedIn: software y extensiones prohibidos](https://www.linkedin.com/help/linkedin/answer/a1341387/prohibited-software-and-extensions).
 - [X: reglas de automatización](https://help.x.com/en/rules-and-policies/x-automation).
 
-## Pendiente de decisión del usuario
+## Autorización de implementación
 
-Revisar la propuesta y la alternativa de videos MP4 animados cuando no haya generador incluido. La publicación mediante navegador, incluida LinkedIn y X, permanece dentro del alcance solicitado y está sujeta a las herramientas disponibles, la aprobación de cada pieza y la verificación del resultado. Tras revisar el diseño se elaborará el plan de implementación y se construirá la skill.
+El usuario aceptó los MP4 con fotos, textos y animaciones como alternativa inicial y pidió avanzar con la implementación. La publicación mediante navegador, incluida LinkedIn y X, permanece dentro del alcance solicitado y está sujeta a las herramientas disponibles, la aprobación de cada pieza y la verificación del resultado. No se necesita otra ronda de aprobación del plan técnico para realizar el trabajo autorizado.

@@ -1,0 +1,14 @@
+{
+  "brand_name": "TALLER RÍO / MARCA FICTICIA",
+  "headline": "Las manos crean.\nLa pausa inspira.",
+  "body": "Cerámica y pequeños rituales para volver a lo simple. Una invitación ficticia a disfrutar el proceso, a tu ritmo.",
+  "cta": "Dale forma a tu próxima pausa",
+  "background": "#123A32",
+  "foreground": "#FFF4DA",
+  "accent": "#EAA47C",
+  "size": [1080, 1350],
+  "slides": [
+    {"text": "Hecho con tiempo. Hecho por vos."}
+  ],
+  "seconds_per_slide": 3
+}

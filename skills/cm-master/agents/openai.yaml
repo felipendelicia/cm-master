@@ -1,0 +1,6 @@
+interface:
+  display_name: "CM Master"
+  short_description: "Marcas, contenido y publicación con aprobación"
+  default_prompt: "Usa $cm-master para preparar y gestionar el contenido orgánico de mi marca con aprobación antes de publicar."
+policy:
+  allow_implicit_invocation: true

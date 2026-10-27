@@ -1,0 +1,24 @@
+# Runtime data belongs outside the public skill repository.
+/brands/
+/data/
+/state/
+/.cm-master/
+/output/
+/tmp/
+
+# Credentials and local configuration.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+token*.json
+cookies*.json
+
+# Python and operating system artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.DS_Store

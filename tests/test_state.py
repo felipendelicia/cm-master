@@ -194,6 +194,58 @@ class StateTests(unittest.TestCase):
             child.communicate(timeout=15)
         self.assertEqual(sorted(child.returncode for child in children), [0, 1])
 
+    def test_blocked_attempt_cannot_bypass_reconciliation_by_revoking(self):
+        self.stage()
+        self.approve()
+        self.call("begin", "faro", "p1")
+        self.call("record", "faro", "p1", "--status", "blocked", "--evidence", "Editor dejó de responder")
+        self.call("revoke", "faro", "p1", "--reason", "Quiero volver a intentar", ok=False)
+        self.call("approve", "faro", "p1", "--review-sha", self.call("review", "faro", "p1")["review_sha"],
+                  "--by", "Humano", "--evidence", "No reconcilia por sí solo", ok=False)
+
+    def test_verified_remote_result_can_close_changed_local_package(self):
+        self.stage(scheduled_at=(datetime.now(timezone.utc) + timedelta(days=1)).isoformat())
+        self.approve()
+        self.call("begin", "faro", "p1", "--mode", "schedule")
+        (self.brand / "assets/test.png").unlink()
+        first = self.call("record", "faro", "p1", "--status", "scheduled", "--evidence", "Servicio aceptó id 456")
+        self.assertEqual(first["state"], "uncertain")
+        closed = self.call("record", "faro", "p1", "--status", "scheduled", "--reconciled",
+                           "--evidence", "Se abrió id 456 y se verificaron cuenta, medios, copy y fecha remotos")
+        self.assertEqual(closed["state"], "scheduled")
+        self.assertIsNone(closed["approval"])
+        self.assertTrue(closed["result"]["local_changed"])
+        self.call("cancel-scheduled", "faro", "p1", "--evidence", "El servicio confirmó cancelación id 456")
+
+    def test_draft_can_preserve_delivery_deadline_without_inventing_account_or_publish_date(self):
+        spec = Path(self.tmp.name) / "draft.json"
+        spec.write_text(json.dumps({"network": "instagram", "format": "feed", "text": "Para revisar",
+                                    "media": ["assets/test.png"], "delivery_due_at": "2026-11-01T11:00:00-03:00"}))
+        draft = self.call("draft", "faro", "idea1", "--file", str(spec))
+        self.assertEqual(draft["state"], "draft")
+        saved = json.loads((self.brand / "posts/idea1/post.json").read_text())
+        self.assertNotIn("account", saved)
+        self.assertNotIn("scheduled_at", saved)
+        self.assertEqual(self.call("due")["items"][0]["state"], "draft")
+        self.call("begin", "faro", "idea1", ok=False)
+
+    def test_unrelated_metadata_files_do_not_break_brand_and_post_listing(self):
+        (self.root / "brands/.DS_Store").write_bytes(b"finder metadata")
+        self.stage()
+        (self.brand / "posts/.DS_Store").write_bytes(b"finder metadata")
+        self.assertEqual(len(self.call("list-brands")["brands"]), 1)
+        items = self.call("due")["items"]
+        self.assertEqual([item["post_id"] for item in items], ["p1"])
+
+    def test_blocked_attempt_can_close_a_later_verified_publication_without_retry(self):
+        self.stage()
+        self.approve()
+        self.call("begin", "faro", "p1")
+        self.call("record", "faro", "p1", "--status", "blocked", "--evidence", "No se pudo abrir el comprobante")
+        result = self.call("record", "faro", "p1", "--status", "published", "--evidence", "Se encontró y verificó la pieza en la cuenta")
+        self.assertEqual(result["state"], "published")
+        self.call("begin", "faro", "p1", ok=False)
+
 
 if __name__ == "__main__":
     unittest.main()

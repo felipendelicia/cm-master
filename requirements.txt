@@ -1,2 +1,1 @@
-# ZoneInfo uses the OS database on Linux/macOS; Windows needs the IANA data.
-tzdata>=2025.2; sys_platform == "win32"
+-r skills/cm-master/requirements.txt

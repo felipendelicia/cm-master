@@ -23,11 +23,12 @@ El calendario conserva una fila por destino con:
 | ID de pieza y versión | Vincular la fila con `posts/<post>/post.json` y sus archivos |
 | Objetivo, tema, brief y CTA | Explicar qué intenta lograr |
 | Red, URL de cuenta y formato | Identificar el lugar exacto de publicación |
+| Plazo de preparación, cuando exista | Guardar `delivery_due_at` separado del horario de salida |
 | Fecha/hora con offset y zona IANA | Evitar ambigüedad de ejecución |
 | Texto, medios y fuentes | Localizar el paquete revisable |
 | Estado y próxima acción | Distinguir preparación, aprobación y resultado externo |
 
-Una fecha planificada en el calendario sigue siendo una intención local. El estado programado exige evidencia del servicio como indica [publishing](publishing.md).
+«Dejalo listo mañana a las 11» puede indicar el plazo para entregar archivos o presentarlos a revisión; consérvalo como `delivery_due_at`, sin convertirlo en `scheduled_at` ni en permiso de publicación. Si todavía faltan cuenta, horario o archivos, guarda los campos conocidos mediante `draft` y continúa la preparación. Una fecha de publicación propuesta en el calendario sigue siendo una intención local. El estado programado exige evidencia del servicio como indica [publishing](publishing.md).
 
 ## Producir el paquete por destino
 
@@ -42,4 +43,4 @@ Elige la producción visual según herramientas verificadas del [host](hosts.md)
 
 Abre la imagen para revisar legibilidad, acentos, contraste, logo, recortes y encuadre. En video comprueba reproducción, duración, dimensiones y fotogramas representativos, además de cualquier audio incorporado. Si una dependencia impide producir un archivo, guarda el trabajo terminado y explica qué falta. No agregues servicios pagos para resolverlo sin una decisión del usuario.
 
-Cuando el paquete esté completo, ejecuta `stage` y `review` conforme a [local-tools](local-tools.md), muestra el resultado concreto y sigue el proceso de aprobación de [publishing](publishing.md).
+Conserva el avance mediante `draft` mientras falten datos o archivos finales. Cuando el paquete tenga cuenta exacta, medios y horario de publicación, ejecuta `stage` y `review` conforme a [local-tools](local-tools.md), muestra el resultado concreto y sigue el proceso de aprobación de [publishing](publishing.md).

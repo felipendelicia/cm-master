@@ -18,6 +18,7 @@ python3 SKILL_DIR/scripts/cm.py --root DIR <command> ...
 init-brand ID --name NAME [--website URL]
 list-brands
 profile ID [--file JSON]
+draft ID POST --file JSON
 stage ID POST --file JSON
 review ID POST
 approve ID POST --review-sha SHA --evidence TEXT --by NAME
@@ -25,14 +26,28 @@ revoke ID POST --reason TEXT
 cancel-scheduled ID POST --evidence TEXT
 check ID POST [--mode publish|schedule]
 begin ID POST [--mode publish|schedule]
-record ID POST --status published|scheduled|uncertain|blocked --evidence TEXT [--url URL]
+record ID POST --status published|scheduled|uncertain|blocked --evidence TEXT [--url URL] [--reconciled]
 resolve ID POST --outcome not-published --evidence TEXT
 due [--brand ID]
 ```
 
-Todos son subcomandos de `cm.py`; la salida es JSON y un estado inválido produce código de salida no cero. Interpreta el resultado antes de continuar. `profile` consulta el perfil sin `--file`, o combina desde un JSON los diccionarios y reemplaza las listas; regenera `manual.md` y guarda una revisión del perfil. `stage` guarda el manifiesto de una pieza; `review` devuelve detalles revisables y la huella canónica actual sin cambiar el estado.
+Todos son subcomandos de `cm.py`; la salida es JSON y un estado inválido produce código de salida no cero. Interpreta el resultado antes de continuar. `profile` consulta el perfil sin `--file`, o combina desde un JSON los diccionarios y reemplaza las listas; regenera `manual.md` y guarda una revisión del perfil.
 
-Los paquetes persistidos forman el calendario operativo. `due` inspecciona la cola local, sin efectos en redes: cada item informa `brand_id`, `post_id`, `state`, `ready` y, cuando no está listo, `reason`. Omite piezas aprobadas con fecha futura; las programadas pueden permanecer como no listas para que se verifique su resultado remoto. Los planes, fuentes y reportes se guardan con las herramientas de archivos del host; no hay comandos adicionales de analíticas o calendario global.
+`draft` conserva un manifiesto parcial en `posts/<post>/post.json`, con estado `draft`, sin aprobación ni huella canónica aprobable. Permite avanzar sin inventar `account`, `scheduled_at` o medios faltantes. `delivery_due_at` es un plazo opcional de preparación/entrega, distinto de la fecha de publicación. Por ejemplo, para un pedido ficticio de «dejalo listo mañana a las 11» el archivo puede contener sólo lo conocido:
+
+```json
+{
+  "network": "instagram",
+  "format": "reel",
+  "timezone": "America/Argentina/Buenos_Aires",
+  "delivery_due_at": "2026-11-03T11:00:00-03:00",
+  "brief": "Preparar un montaje para revisión; cuenta y fecha de publicación pendientes."
+}
+```
+
+Completa datos y archivos finales antes de `stage`; este comando valida y guarda la pieza con estado pendiente de aprobación. Entonces `review` devuelve detalles revisables y la huella canónica actual sin cambiar el estado. El flujo es `draft` → completar → `stage` → `review` → consentimiento humano → `approve`.
+
+Los paquetes persistidos forman el calendario operativo. `due` inspecciona la cola local, sin efectos en redes: cada item informa `brand_id`, `post_id`, `state`, `ready` y, cuando no está listo, `reason`. Los borradores aparecen con `ready: false`, motivo de preparación pendiente y `delivery_due_at` cuando existe. Omite piezas aprobadas con fecha futura; las programadas pueden permanecer como no listas para que se verifique su resultado remoto. Los planes, fuentes y reportes se guardan con las herramientas de archivos del host; no hay comandos adicionales de analíticas o calendario global.
 
 Ejemplo de manifiesto ficticio completo; el archivo visual debe existir dentro de la marca elegida antes de revisar/aprobar:
 
@@ -52,7 +67,7 @@ Ejemplo de manifiesto ficticio completo; el archivo visual debe existir dentro d
 }
 ```
 
-Campos obligatorios: `network` (`linkedin|instagram|facebook|x`), `account` (URL exacta), `format` (`feed|story|reel|carousel|video`), `scheduled_at` (ISO 8601 con offset), `timezone` (IANA), `text`, `alt_text` y `media` (lista de rutas relativas a la marca). Opcionales: `objective`, `sources`, `brief`. La presencia de un formato en el esquema no implica que toda red o herramienta lo admita.
+Campos obligatorios para `stage`: `network` (`linkedin|instagram|facebook|x`), `account` (URL exacta), `format` (`feed|story|reel|carousel|video`), `scheduled_at` (ISO 8601 con offset), `timezone` (IANA), `text`, `alt_text` y `media` (lista de rutas relativas a la marca). Opcionales: `objective`, `sources`, `brief`, `delivery_due_at`. En `draft` se conservan campos parciales; un plazo de preparación no sustituye `scheduled_at`. La presencia de un formato en el esquema no implica que toda red o herramienta lo admita.
 
 ## Huellas, ventanas y reconciliación
 
@@ -62,7 +77,9 @@ La huella une texto, medios, cuenta y programación; modificar archivos visuales
 
 `record` guarda lo observado tras una reserva; no efectúa la acción remota. `scheduled` requiere aceptación comprobada del servicio y `published` requiere prueba de publicación. Permite actualizar `scheduled` a `published` con evidencia tras verificar la salida, sin una nueva reserva. `uncertain` conserva una duda sobre el resultado del envío; `blocked` conserva un impedimento. Una interrupción tras reservar exige reconciliar el destino, incluso si no hubo tiempo de registrar el resultado. `resolve --outcome not-published` sólo se usa con evidencia de ausencia: conserva la aprobación si la huella sigue idéntica o devuelve la pieza a pendiente de aprobación si cambió.
 
-`revoke` revoca la autorización local antes del envío. Si la pieza ya está programada en el servicio, cancélala allí mediante el navegador autorizado y comprueba el resultado; entonces `cancel-scheduled --evidence ...` registra `scheduled` → `cancelled` y elimina la aprobación local. Este comando no cancela nada remotamente. Sigue [publishing](publishing.md) para decidir la transición correcta; el envío incierto no se reintenta automáticamente.
+Si el paquete local cambió o sus archivos desaparecieron, un resultado externo informado puede quedar `uncertain`. Después de verificar la versión, cuenta y fecha reales en el servicio, usa `record ... --status published|scheduled --evidence ... --reconciled`. Este flag sólo cierra un estado `uncertain` hacia `published` o `scheduled`, incluso si el archivo local ya no coincide o no está. El resultado conserva `attempt_review_sha`, `local_changed` y la advertencia correspondiente; la aprobación del paquete modificado queda vacía. No aprueba la nueva versión ni reenvía nada.
+
+`revoke` revoca la autorización local antes del envío y rechaza también `blocked`: primero reconcilia la operación mediante `resolve` con evidencia de ausencia. Si la pieza ya está programada en el servicio, cancélala allí mediante el navegador autorizado y comprueba el resultado; entonces `cancel-scheduled --evidence ...` registra `scheduled` → `cancelled` y elimina la aprobación local. Este comando no cancela nada remotamente. Sigue [publishing](publishing.md) para decidir la transición correcta; el envío incierto no se reintenta automáticamente.
 
 Las huellas aportan integridad local de la versión y el historial aporta trazabilidad. Ninguno autentica criptográficamente al humano ni demuestra por sí mismo que el servicio social recibió la pieza.
 
@@ -73,6 +90,8 @@ python3 SKILL_DIR/scripts/render_media.py SPEC.json --output PATH [--kind image|
 ```
 
 Lee un JSON y exporta un PNG o un MP4 real. No depende del módulo de estado ni publica nada. Requiere Pillow; para MP4 usa FFmpeg del sistema o imageio-ffmpeg, disponibles entre las dependencias opcionales de medios del proyecto. Si falta una dependencia falla claramente; conserva ese error como diagnóstico, sin tratarlo como un archivo terminado.
+
+Los manifiestos de dependencias viajan dentro de la carpeta instalada: `SKILL_DIR/requirements.txt` (datos IANA en Windows) y `SKILL_DIR/requirements-media.txt` (Pillow y encoder). Para habilitar el renderer, usa un entorno virtual elegido para la operación y su intérprete: `python3 -m venv /ruta/al/entorno`, luego `/ruta/al/entorno/bin/python -m pip install -r SKILL_DIR/requirements.txt -r SKILL_DIR/requirements-media.txt`. En Windows el intérprete se encuentra normalmente en `Scripts/python.exe`. No dependas del clon original del repositorio después de instalar la skill.
 
 El spec admite `brand_name`, `headline`, `body`, `cta`, `background`, `foreground`, `accent`, `size: [w,h]`, `slides` y `seconds_per_slide`. `brand_name` y `headline` deben ser textos no vacíos; `body` y `cta` son opcionales. Cada slide es un objeto con `text` e `image` opcionales. Las imágenes PNG/JPEG/WebP se resuelven respecto del directorio del spec, sin escapes por `../` o symlinks. Mantén spec, imágenes y salida dentro de la carpeta de la marca al producir material operativo.
 

@@ -1,0 +1,2 @@
+# ZoneInfo uses the OS database on Linux/macOS; Windows needs IANA data.
+tzdata>=2025.2; sys_platform == "win32"

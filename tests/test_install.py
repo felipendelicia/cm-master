@@ -15,7 +15,8 @@ class InstallTests(unittest.TestCase):
             result = subprocess.run([sys.executable, str(INSTALL), "--host", "codex", "--destination", str(destination)],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
-            for relative in ["SKILL.md", "scripts/cm.py", "scripts/cm_state.py", "agents/openai.yaml", "references/publishing.md"]:
+            for relative in ["SKILL.md", "scripts/cm.py", "scripts/cm_state.py", "agents/openai.yaml", "references/publishing.md",
+                             "requirements.txt", "requirements-media.txt"]:
                 self.assertTrue((destination / relative).is_file(), relative)
             self.assertFalse((Path(directory) / ".cm-master").exists())
             check = subprocess.run([sys.executable, str(destination / "scripts/cm.py"), "--help"], capture_output=True)

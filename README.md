@@ -77,9 +77,9 @@ brands/mi-marca/
     post.json    state.json
 ```
 
-Los paquetes forman el calendario operativo. El usuario revisa el texto y archivos finales junto con cuenta, red y horario; después la IA registra el consentimiento con su huella. Un cambio de esos elementos invalida la aprobación. Aprobar la estrategia o el manual no aprueba las publicaciones futuras.
+Los paquetes forman el calendario operativo. Se pueden guardar borradores con `draft` aunque falten cuenta o fecha de publicación; `delivery_due_at` representa el plazo de preparación, no autoriza una salida. Al completar los datos se usa `stage` para obtener una revisión aprobable. El usuario revisa el texto y archivos finales junto con cuenta, red y horario; después la IA registra el consentimiento con su huella. Un cambio de esos elementos invalida la aprobación. Aprobar la estrategia o el manual no aprueba las publicaciones futuras.
 
-Antes de enviar se reserva el intento con `begin`; después se registra la evidencia real de la red. `scheduled` requiere confirmación del servicio. Si se corta el proceso, se comprueba el destino antes de reintentar. Una reserva local o una tarea del host no prueba que se publicó. La cancelación local tampoco retira una programación remota: primero se cancela y verifica en la red, después se registra ese resultado.
+Antes de enviar se reserva el intento con `begin`; después se registra la evidencia real de la red. `scheduled` requiere confirmación del servicio. Si se corta el proceso, se comprueba el destino antes de reintentar. Si un medio local cambió, la reconciliación explícita permite registrar el resultado remoto comprobado sin aprobar ese archivo modificado. Una reserva local o una tarea del host no prueba que se publicó. La cancelación local tampoco retira una programación remota: primero se cancela y verifica en la red, después se registra ese resultado.
 
 La CLI registra evidencia y versiones; no autentica criptográficamente al humano ni valida por sí sola un comprobante remoto. El navegador sigue los controles del host. Ver [publicación](skills/cm-master/references/publishing.md) y [contratos locales](skills/cm-master/references/local-tools.md).
 

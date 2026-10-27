@@ -21,11 +21,11 @@ def parser():
     profile = sub.add_parser("profile")
     profile.add_argument("brand")
     profile.add_argument("--file", type=Path)
-    for command in ("stage", "review", "approve", "revoke", "check", "begin", "record", "resolve", "cancel-scheduled"):
+    for command in ("draft", "stage", "review", "approve", "revoke", "check", "begin", "record", "resolve", "cancel-scheduled"):
         command_parser = sub.add_parser(command)
         command_parser.add_argument("brand")
         command_parser.add_argument("post")
-        if command == "stage":
+        if command in {"draft", "stage"}:
             command_parser.add_argument("--file", type=Path, required=True)
         elif command == "approve":
             command_parser.add_argument("--review-sha", required=True)
@@ -39,6 +39,7 @@ def parser():
             command_parser.add_argument("--status", choices=("published", "scheduled", "uncertain", "blocked"), required=True)
             command_parser.add_argument("--evidence", required=True)
             command_parser.add_argument("--url")
+            command_parser.add_argument("--reconciled", action="store_true")
         elif command == "resolve":
             command_parser.add_argument("--outcome", choices=("not-published",), required=True)
             command_parser.add_argument("--evidence", required=True)
@@ -61,6 +62,8 @@ def dispatch(store, args):
         return store.due(args.brand)
     if c == "stage":
         return store.stage(args.brand, args.post, read_json(args.file))
+    if c == "draft":
+        return store.draft(args.brand, args.post, read_json(args.file))
     if c == "review":
         return store.review(args.brand, args.post)
     if c == "approve":
@@ -72,7 +75,7 @@ def dispatch(store, args):
     if c == "begin":
         return store.begin(args.brand, args.post, args.mode)
     if c == "record":
-        return store.record(args.brand, args.post, args.status, args.evidence, args.url)
+        return store.record(args.brand, args.post, args.status, args.evidence, args.url, args.reconciled)
     if c == "cancel-scheduled":
         return store.cancel_scheduled(args.brand, args.post, args.evidence)
     return store.resolve(args.brand, args.post, args.outcome, args.evidence)

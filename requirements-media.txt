@@ -1,4 +1,1 @@
-# Optional; the editorial-state CLI uses only Python's standard library.
-# Install in a virtual environment: python -m pip install -r requirements-media.txt
-Pillow>=10.4,<13
-imageio-ffmpeg>=0.5.1,<0.7
+-r skills/cm-master/requirements-media.txt

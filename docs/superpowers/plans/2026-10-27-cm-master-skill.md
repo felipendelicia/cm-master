@@ -32,7 +32,7 @@
 
 CLI: `python skills/cm-master/scripts/cm.py --root DIR <command> ...`. `--root` es opcional y equivale a `CM_MASTER_HOME` o `~/.cm-master`.
 
-Comandos: `init-brand ID --name NAME [--website URL]`, `list-brands`, `profile ID [--file JSON]`, `stage ID POST --file JSON`, `review ID POST`, `approve ID POST --review-sha SHA --evidence TEXT --by NAME`, `revoke ID POST --reason TEXT`, `check ID POST [--mode publish|schedule]`, `begin ID POST [--mode publish|schedule]`, `record ID POST --status published|scheduled|uncertain|blocked --evidence TEXT [--url URL]`, `resolve ID POST --outcome not-published --evidence TEXT`, `due [--brand ID]`.
+Comandos: `init-brand ID --name NAME [--website URL]`, `list-brands`, `profile ID [--file JSON]`, `draft ID POST --file JSON`, `stage ID POST --file JSON`, `review ID POST`, `approve ID POST --review-sha SHA --evidence TEXT --by NAME`, `revoke ID POST --reason TEXT`, `check ID POST [--mode publish|schedule]`, `begin ID POST [--mode publish|schedule]`, `record ID POST --status published|scheduled|uncertain|blocked --evidence TEXT [--url URL] [--reconciled]`, `resolve ID POST --outcome not-published --evidence TEXT`, `cancel-scheduled ID POST --evidence TEXT`, `due [--brand ID]`.
 
 Manifiesto de pieza: `network` (`linkedin|instagram|facebook|x`), `account` (URL exacta), `format` (`feed|story|reel|carousel|video`), `scheduled_at` (ISO 8601 con offset), `timezone` (IANA), `text`, `alt_text`, `media` (lista de rutas relativas a la carpeta de marca), y opcionales `objective`, `sources`, `brief`. Conservar el paquete en `posts/<post>/post.json`. `review` devuelve la huella canónica y los detalles aprobables; `approve` exige esa huella actual y evidencia humana. La CLI no autentica al humano ni opera el navegador.
 
@@ -42,7 +42,7 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 
 ### Task 1: Estado editorial, aprobación y reserva
 
-**Files:** `skills/cm-master/scripts/cm.py`, `skills/cm-master/scripts/cm_state.py`, `tests/test_state.py`, `tests/test_cli.py`.
+**Files:** `skills/cm-master/scripts/cm.py`, `skills/cm-master/scripts/cm_state.py`, `tests/test_state.py` (contratos de estado y CLI en subprocesos).
 
 **Interfaces:** produce la CLI y manifiesto indicados arriba, JSON de salida y exit code no cero ante estado inválido. Sin dependencias externas.
 
@@ -91,3 +91,11 @@ Renderer: `python .../render_media.py SPEC.json --output PATH [--kind image|vide
 - Reutilizar el checkout limpio en una rama de trabajo; el repositorio recién creado sólo contiene nuestro diseño y no requiere otra copia del proyecto.
 - Delegar los componentes independientes de medios y documentación en paralelo; el controlador implementa estado y empaquetado. Compartir contratos, no archivos de implementación.
 - Las pruebas no publican en redes, no envían emails y no crean tareas reales.
+
+## Ajustes comprobados durante implementación
+
+- Las pruebas independientes demostraron que faltaba conservar borradores sin cuenta/fecha. `draft` conserva datos parciales y `delivery_due_at` sin inventar fecha de publicación; `due` los muestra como no ejecutables. `stage` exige completar el contrato antes de obtener una revisión aprobable.
+- La revisión de código detectó que `revoke` permitía evitar la reconciliación desde `blocked`; se protege también ese estado y el test reprodujo la falla antes de corregirla.
+- Para una salida remota comprobada cuyo medio local cambió, `record --reconciled` cierra sólo un resultado incierto con evidencia explícita y conserva la advertencia/versiones. No vuelve a aprobar el paquete local modificado.
+- Los requirements viajan dentro de la skill instalada; los archivos de raíz los incluyen sin duplicar versiones.
+- Archivos ajenos como `.DS_Store` no interrumpen el listado de marcas/paquetes.

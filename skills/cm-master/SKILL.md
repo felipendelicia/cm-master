@@ -30,7 +30,8 @@ Lee sólo las referencias que requiera el trabajo actual. Una consulta de métri
 
 - Mantén fuentes, fecha y grado de certeza junto a los datos del negocio. El mercado inicial sugerido es Argentina, español rioplatense y `America/Argentina/Buenos_Aires`; el perfil de la marca manda.
 - Propón cuatro semanas y prepara los próximos siete días. Ajusta la cadencia a objetivos, activos, revisión y capacidad real de publicación.
-- Cada destino recibe su paquete con texto, archivo visual final comprobado, cuenta y horario. Una aprobación identifica esa versión concreta; cambios de texto, medios, cuenta o fecha requieren otra revisión.
+- Guarda avances incompletos con `draft`, sin inventar cuenta o fecha de salida. «Listo mañana a las 11» puede ser un plazo de entrega (`delivery_due_at`), no una autorización para publicar. Al completar el destino, medios y horario, usa `stage` y presenta la versión concreta para aprobación.
+- Una aprobación identifica esa versión; cambios de texto, medios, cuenta o fecha requieren otra revisión. Si el paquete local cambió durante un envío, reconcilia la versión real remota y registra su evidencia sin aprobar el material modificado ni reenviarlo.
 - Para cualquiera de las cuatro redes, usa el navegador autenticado cuando esté disponible y autorizado. La acción final sigue los controles del host. Reserva con `begin` antes de enviar y registra evidencia del servicio después. Un envío incierto se reconcilia antes de repetirlo.
 - Conserva archivos y explica la capacidad concreta que falta si no puede completarse una operación. Comunica por separado lo preparado, lo aprobado y el resultado observado; una fecha local no acredita programación remota.
 

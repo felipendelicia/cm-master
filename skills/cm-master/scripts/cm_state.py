@@ -170,6 +170,8 @@ class Store:
             return {"brands": []}
         entries = []
         for folder in sorted(directory.iterdir()):
+            if not folder.is_dir():
+                continue
             base = self.brand(folder.name)
             data = read_json(self.safe(base, "profile.json"))
             entries.append({"id": folder.name, "name": data["name"], "path": str(base)})
@@ -247,6 +249,30 @@ class Store:
             if not path.is_file() or path.stat().st_size == 0:
                 raise StateError(f"Falta el archivo final: {item}.")
 
+    def validate_draft(self, brand, data):
+        """Persist known facts without inventing an account or publication date."""
+        base = self.brand(brand)
+        if data.get("network") and data["network"] not in {"linkedin", "instagram", "facebook", "x"}:
+            raise StateError("Red no soportada.")
+        if data.get("account"):
+            url(data["account"])
+        if data.get("format") and data["format"] not in {"feed", "story", "reel", "carousel", "video"}:
+            raise StateError("Formato no soportado.")
+        if data.get("format") in {"story", "reel"} and data.get("network") in {"linkedin", "x"}:
+            raise StateError("Historias y reels sólo se planifican para Instagram/Facebook.")
+        for key in ("text", "alt_text", "brief", "objective"):
+            if key in data and not isinstance(data[key], str):
+                raise StateError(f"{key} debe ser texto.")
+        media = data.get("media", [])
+        if not isinstance(media, list) or any(not isinstance(item, str) for item in media):
+            raise StateError("media debe ser una lista de rutas relativas.")
+        for relative in media:
+            self.safe(base, relative)
+        for field in ("scheduled_at", "delivery_due_at"):
+            if data.get(field):
+                scheduled_time({"scheduled_at": data[field],
+                                "timezone": data.get("timezone") or self.profile(brand)["timezone"]})
+
     def load(self, brand, post, validate=True):
         base, manifest, statefile = self.post_paths(brand, post)
         if not manifest.is_file():
@@ -275,15 +301,25 @@ class Store:
         return state
 
     def stage(self, brand, post, data):
+        self.validate_post(self.brand(brand), data)
+        return self.save_package(brand, post, data, complete=True)
+
+    def draft(self, brand, post, data):
+        self.validate_draft(brand, data)
+        return self.save_package(brand, post, data, complete=False)
+
+    def save_package(self, brand, post, data, complete):
         base, manifest, statefile = self.post_paths(brand, post)
-        self.validate_post(base, data)
         previous = read_json(statefile) if statefile.exists() else {"events": []}
         if previous.get("state") in {"in_flight", "published", "scheduled", "uncertain", "blocked"}:
             raise StateError("Resolver el estado anterior antes de reemplazar esa pieza; usar otro ID para otra publicación.")
         self.write_json(manifest, data)
-        previous.update(state="pending_approval", approval=None)
-        self.save_state(brand, post, previous, "stage")
-        return self.review(brand, post)
+        previous.update(state="pending_approval" if complete else "draft", approval=None)
+        self.save_state(brand, post, previous, "stage" if complete else "draft")
+        if complete:
+            return self.review(brand, post)
+        return {"brand_id": brand, "post_id": post, "state": "draft", "post": data,
+                "path": str(manifest), "notice": "Borrador local; completar y ejecutar stage antes de revisar y aprobar."}
 
     def review(self, brand, post):
         base, data, state = self.load(brand, post)
@@ -305,7 +341,7 @@ class Store:
     def revoke(self, brand, post, reason):
         nonempty(reason, "motivo")
         _, _, state = self.load(brand, post, validate=False)
-        if state["state"] in {"published", "scheduled", "in_flight", "uncertain"}:
+        if state["state"] in {"published", "scheduled", "in_flight", "uncertain", "blocked"}:
             raise StateError("La operación ya fue enviada o está en curso; comprobar/cancelar en la red primero.")
         state.update(state="cancelled", approval=None)
         return self.save_state(brand, post, state, "revoke", reason=reason)
@@ -344,29 +380,37 @@ class Store:
         self.save_state(brand, post, state, "begin", mode=mode)
         return {**ready, "state": "in_flight", "notice": "Reserva local: todavía no se publicó ni programó en la red."}
 
-    def record(self, brand, post, status, evidence, result_url=None):
+    def record(self, brand, post, status, evidence, result_url=None, reconciled=False):
         nonempty(evidence, "evidencia externa")
         if result_url:
             url(result_url)
         base, data, state = self.load(brand, post, validate=False)
+        if reconciled and (state["state"] != "uncertain" or status not in {"published", "scheduled"}):
+            raise StateError("--reconciled sólo cierra un resultado incierto tras verificar publicación/programación remota.")
         if status not in {"published", "scheduled", "uncertain", "blocked"}:
             raise StateError("Resultado inválido.")
         verifying_schedule = state["state"] == "scheduled" and status in {"published", "uncertain"}
-        if state["state"] not in {"in_flight", "uncertain"} and not verifying_schedule:
+        verifying_block = state["state"] == "blocked" and status in {"published", "scheduled", "uncertain"}
+        if state["state"] not in {"in_flight", "uncertain"} and not verifying_schedule and not verifying_block:
             raise StateError("No hay una operación reservada para registrar ese resultado.")
         attempt = state.get("attempt", {})
-        if status == "scheduled" and attempt.get("mode") != "schedule":
+        if status == "scheduled" and attempt.get("mode") != "schedule" and not reconciled:
             raise StateError("La operación no reservó programación remota.")
         # A scheduled item may have appeared immediately, so published is valid for either mode.
         try:
             changed = self.digest(base, data) != attempt.get("review_sha")
         except (StateError, OSError, KeyError, TypeError):
             changed = True
-        result = {"status": status, "evidence": evidence, "url": result_url, "at": timestamp()}
-        if changed and status in {"published", "scheduled"}:
+        result = {"status": status, "evidence": evidence, "url": result_url, "at": timestamp(),
+                  "local_changed": changed, "attempt_review_sha": attempt.get("review_sha"), "reconciled": reconciled}
+        if changed and status in {"published", "scheduled"} and not reconciled:
             result["reported_status"] = status
             result["status"] = "uncertain"
             result["warning"] = "El paquete cambió durante la operación; reconciliar la versión enviada."
+        if changed:
+            state["approval"] = None
+        if changed and reconciled:
+            result["warning"] = "Resultado remoto verificado; el paquete local modificado no quedó aprobado."
         state.update(state=result["status"], result=result)
         return self.save_state(brand, post, state, "record", result=result)
 
@@ -391,8 +435,17 @@ class Store:
         for name in brands:
             base = self.brand(name)
             for directory in sorted(self.safe(base, "posts").iterdir()):
+                if not directory.is_dir():
+                    continue
                 try:
-                    _, data, state = self.load(name, directory.name)
+                    _, data, state = self.load(name, directory.name, validate=False)
+                    if state["state"] == "draft":
+                        self.validate_draft(name, data)
+                        items.append({"brand_id": name, "post_id": directory.name, "state": "draft", "ready": False,
+                                      "reason": "Borrador pendiente; ejecutar stage con cuenta, archivos finales y fecha de publicación para revisión.",
+                                      "delivery_due_at": data.get("delivery_due_at")})
+                        continue
+                    self.validate_post(base, data)
                     if state["state"] == "published":
                         continue
                     at = scheduled_time(data)

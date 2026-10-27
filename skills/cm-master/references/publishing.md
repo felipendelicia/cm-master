@@ -4,6 +4,8 @@ Lee esta referencia antes de aprobar, enviar, programar o reconciliar una pieza.
 
 ## Preparar una decisión concreta
 
+Un pedido de preparación con plazo de entrega se conserva como `draft`; no autoriza una salida a esa hora. Completa cuenta, medios y horario de publicación antes de pasar por `stage` a revisión. El borrador admite datos parciales y carece de huella canónica aprobable.
+
 El paquete revisable muestra ID y versión, marca, red, URL exacta de cuenta, formato, texto final completo, medios finales visibles, alt text y horario con zona. Ejecuta `review` para obtener la huella actual. El usuario puede aprobar una pieza o una tanda numerada cuyas versiones, destinos y horarios estén visibles. Conserva como evidencia el mensaje o referencia de conversación que expresa ese consentimiento y quién lo dio.
 
 Registra el consentimiento mediante `approve ... --review-sha ... --evidence ... --by ...`. La CLI comprueba coherencia; no autentica a la persona. Una casilla heredada, la aprobación del manual o la aceptación del calendario no identifica por sí sola una pieza final autorizada. Si el usuario pide un cambio, actualiza los archivos y manifiesto, vuelve a `review` y presenta la nueva versión para aprobar. `revoke` cancela la autorización local antes de ejecutar; no retira automáticamente una publicación o programación ya enviada al servicio.
@@ -25,11 +27,15 @@ Si el proceso se interrumpe después de `begin`, la reserva sigue vigente. `begi
 
 ## Reconciliar incertidumbre o bloqueo
 
-Si no está claro si el servicio recibió el envío, registra `uncertain` con lo observado y examina el perfil, historial o cola de programación de la cuenta correcta antes de cualquier reintento. Si encuentras la pieza, registra el resultado real y su evidencia. Si no puedes determinarlo, conserva el estado incierto y comunica la verificación pendiente.
+Si no está claro si el servicio recibió el envío, registra `uncertain` con lo observado y examina el perfil, historial o cola de programación de la cuenta correcta antes de cualquier reintento. Si encuentras la pieza, comprueba su versión real, cuenta y fecha remotas y registra el resultado con esa evidencia. Si no puedes determinarlo, conserva el estado incierto y comunica la verificación pendiente.
+
+Si los medios locales cambiaron o desaparecieron durante la operación, `record` puede conservar `uncertain` aunque informes un resultado publicado/programado. Después de verificar la versión real remota, cierra esa incertidumbre con `record ... --status published|scheduled --evidence ... --reconciled`, incluyendo URL o comprobante cuando exista. El flag sólo opera desde `uncertain` hacia uno de esos resultados; no envía nada ni aprueba el paquete local modificado. Conserva la huella del intento y la advertencia de cambio. Si corresponde cancelar una programación ya reconciliada, sigue el procedimiento de cancelación remota de abajo.
 
 Sólo si existe evidencia suficiente de que la pieza no fue publicada ni programada, utiliza `resolve ... --outcome not-published --evidence ...`. Si la huella permanece idéntica, conserva la aprobación ya otorgada; si cambió, queda pendiente de aprobación. Repasa la versión y la ventana horaria antes de una nueva reserva. Una página que no cargó no acredita ausencia.
 
-Cuando un impedimento confirmado detiene una operación ya reservada, registra `blocked` con su causa. Si detectas el impedimento antes de reservar, conserva la pieza y documenta la limitación en su historial, sin iniciar un envío. Para retomar un paquete reservado, resuelve primero la ausencia de publicación con evidencia.
+Cuando un impedimento confirmado detiene una operación ya reservada, registra `blocked` con su causa. Si detectas el impedimento antes de reservar, conserva la pieza y documenta la limitación en su historial, sin iniciar un envío. Para retomar o revocar un paquete reservado o bloqueado, resuelve primero la ausencia de publicación con evidencia; `revoke` no reemplaza esa reconciliación.
+
+Si al revisar un intento `blocked` encuentras que el servicio sí recibió la pieza, registra el resultado observado con `record` en lugar de reintentar. También puedes conservar `uncertain` si la comprobación no resuelve el resultado. Si el paquete local cambió y el resultado queda incierto, aplica la reconciliación explícita descrita arriba.
 
 Si ya hay una programación remota y el usuario la revoca, retírala del servicio mediante una acción autorizada y comprueba el resultado. Sólo entonces usa `cancel-scheduled ID POST --evidence TEXT` para dejarla cancelada y sin aprobación local. Ese comando no borra nada del servicio. Si no puedes confirmar la cancelación, conserva la evidencia del problema y comunica que la salida remota aún puede ocurrir.
 

@@ -20,16 +20,19 @@ La inspiración en Google Pomelli es su perfil de marca persistente y corregible
 - Analizar resultados y competidores para mejorar visibilidad.
 - Repositorio público `felipendelicia/cm-master`.
 - El usuario delegó la propuesta de calendario y preguntó por recordatorios por mail y ejecución autónoma.
+- El usuario aclaró que ya publica en X y LinkedIn mediante GPT dots. La publicación mediante control de navegador forma parte del alcance solicitado también para esas redes; esta experiencia fue informada por el usuario, no comprobada en cuentas reales durante el diseño.
 
 ## Propuestas que requieren revisar el alcance
 
-### Publicación y condiciones de cada red
+### Publicación mediante el navegador del host
 
-Soportar contenido y seguimiento para las cuatro redes no equivale a disponer de publicación automática para todas las cuentas.
+La primera versión incluye publicación en LinkedIn, Instagram, Facebook y X mediante las herramientas disponibles en el host, incluido el control de un navegador autenticado. No requiere desarrollar un bot independiente ni contratar una API social para intentar ese flujo. Comprobar la capacidad real de abrir el editor, cargar los archivos finales, completar el texto y ejecutar la acción aprobada en cada cuenta.
 
-La documentación de LinkedIn restringe software que automatice actividad en su sitio, incluida la creación de publicaciones. X prohíbe formas de automatización que no usen su API, como scripts sobre su web. Por ello se propone publicación mediante una integración admitida por cada servicio cuando ya esté disponible para el usuario; en LinkedIn y X, dejar inicialmente un paquete listo para publicación manual si no existe esa integración. No se incorpora un cliente de API pago en la primera versión.
+Las condiciones de LinkedIn y X restringen ciertas formas de automatización. Esas condiciones no son una prueba de imposibilidad técnica ni una razón para eliminar por defecto redes expresamente solicitadas. A su vez, poder controlar el navegador no demuestra autorización de la plataforma: conservar esta distinción y atender los requisitos concretos del servicio, la cuenta y las herramientas disponibles. No asumir que una publicación supervisada tiene una excepción contractual ni que todas las operaciones estarán disponibles.
 
-Para Instagram y Facebook, evaluar las herramientas disponibles, el tipo de cuenta y la posibilidad de operar Meta Business Suite o la programación nativa antes de ofrecer ejecución automática. Usar navegador únicamente cuando la operación esté disponible y admitida; nunca presentar la automatización como garantizada por instalar una skill. Las capacidades y restricciones deben revisarse en el momento de configurar la marca y antes de un cambio de vía de publicación.
+Antes del envío o de confirmar una programación, verificar la aprobación humana del texto y medios finales, la cuenta y el destino. Respetar los controles de autorización del host y comprobar el resultado en la red. Evaluar también Meta Business Suite y la programación nativa cuando estén disponibles. Si aparece un impedimento concreto de acceso, cuenta, herramienta o servicio, conservar el paquete y explicar la intervención necesaria; ofrecer publicación manual cuando no pueda completarse la operación por la vía disponible. No convertirla en el modo obligatorio de LinkedIn o X ni incorporar APIs pagas como requisito oculto.
+
+La documentación de OpenAI describe el navegador y las sesiones de dots, y la extensión de ChatGPT menciona expresamente operaciones en sitios con sesión iniciada como LinkedIn. Esto respalda incluir el flujo en el diseño; no equivale a haber probado una publicación en las cuentas del usuario ni a garantizar idénticas capacidades en Claude Code.
 
 ### Videos e imágenes con la suscripción
 
@@ -85,7 +88,7 @@ Estados conceptuales: borrador, pendiente de aprobación, aprobado, programado, 
 
 ### 5. Publicación y seguimiento
 
-Antes de publicar o programar: comprobar marca, cuenta visible, destino, archivos, versión aprobada y horario. Validar también las capacidades del host y la vía elegida. La skill respeta los controles de autorización del host; un manual no los desactiva.
+Antes de publicar o programar: comprobar marca, cuenta visible, destino, archivos, versión aprobada y horario. Validar también las capacidades del host y la vía elegida, incluido el navegador autenticado para cualquiera de las cuatro redes. La skill respeta los controles de autorización del host; un manual no los desactiva.
 
 Después de ejecutar, recoger enlace, identificador o comprobación de que la pieza fue publicada o aceptada para programación. Registrar evidencia y fecha. Si se interrumpe la operación después de enviar, comprobar el destino antes de reintentar para evitar duplicados; conservar resultado incierto cuando no pueda verificarse. No generar pruebas de publicación ficticias.
 
@@ -147,6 +150,8 @@ Estas extensiones se pueden incorporar después de probar el flujo principal; no
 - [Pomelli: identidad y Brand Books](https://blog.google/innovation-and-ai/models-and-research/google-labs/pomelli-agentic-capabilities/).
 - [OpenAI: crear skills](https://learn.chatgpt.com/docs/build-skills).
 - [OpenAI: tareas programadas](https://learn.chatgpt.com/docs/automations?surface=app).
+- [OpenAI: dots, navegador, sesiones y aprobaciones](https://learn.chatgpt.com/docs/dots).
+- [OpenAI: extensión de navegador y sitios con sesión iniciada](https://learn.chatgpt.com/docs/chrome-extension).
 - [Claude Code: skills](https://code.claude.com/docs/en/skills).
 - [Claude Code: navegador Chrome](https://code.claude.com/docs/en/chrome).
 - [Claude Code: opciones de programación](https://code.claude.com/docs/en/scheduled-tasks).
@@ -155,4 +160,4 @@ Estas extensiones se pueden incorporar después de probar el flujo principal; no
 
 ## Pendiente de decisión del usuario
 
-Revisar esta propuesta, especialmente el cambio de publicación por navegador a integración admitida o publicación manual para LinkedIn/X cuando sea necesario, y la alternativa de videos MP4 animados cuando no haya generador incluido. Tras esa decisión se elaborará el plan de implementación y se construirá la skill.
+Revisar la propuesta y la alternativa de videos MP4 animados cuando no haya generador incluido. La publicación mediante navegador, incluida LinkedIn y X, permanece dentro del alcance solicitado y está sujeta a las herramientas disponibles, la aprobación de cada pieza y la verificación del resultado. Tras revisar el diseño se elaborará el plan de implementación y se construirá la skill.
